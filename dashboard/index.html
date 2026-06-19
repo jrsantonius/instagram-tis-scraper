@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Movement #IndonesiaIsUnderpriced by The Innovators Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root {
+  --bg:       #f8fafc;
+  --white:    #ffffff;
+  --border:   #e2e8f0;
+  --border-sm:#f1f5f9;
+  --text:     #0f172a;
+  --text-2:   #334155;
+  --text-3:   #64748b;
+  --text-4:   #94a3b8;
+  --red:      #dc2626;
+  --red-lt:   #fef2f2;
+  --red-md:   #fecaca;
+  --black:    #0f172a;
+  --indigo:   #dc2626;
+  --indigo-lt:#fef2f2;
+  --indigo-md:#fecaca;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:    0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+  --radius:   14px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-sm);
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 32px; height: 32px;
+  background: var(--indigo);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.3);
+}
+.brand-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px;
+  background: var(--indigo-lt);
+  color: var(--indigo);
+  border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 9px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; font-family: inherit;
+  transition: all 0.16s;
+}
+.btn-primary { background: var(--red); color: white; }
+.btn-primary:hover { background: #b91c1c; box-shadow: 0 4px 12px rgba(220,38,38,0.25); transform: translateY(-1px); }
+.btn-outline { background: var(--black); color: white; border: 1.5px solid var(--black); }
+.btn-outline:hover { background: #1e293b; border-color: #1e293b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+/* ── UPLOAD ZONE ── */
+#uploadZone {
+  display: flex; align-items: center; justify-content: center;
+  min-height: calc(100vh - 60px); padding: 40px 24px;
+}
+.upload-wrap { width: 100%; max-width: 480px; text-align: center; }
+.upload-card {
+  background: var(--white); border: 2px dashed var(--border);
+  border-radius: 20px; padding: 52px 40px 40px;
+  cursor: pointer; transition: all 0.22s;
+}
+.upload-card:hover, .upload-card.drag-over {
+  border-color: var(--red); background: #fff8f8;
+  box-shadow: 0 0 0 4px var(--red-lt);
+}
+.upload-icon-wrap {
+  width: 72px; height: 72px; background: var(--indigo-lt);
+  border-radius: 18px; display: flex; align-items: center;
+  justify-content: center; font-size: 32px; margin: 0 auto 20px;
+}
+.upload-title { font-size: 19px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
+.upload-desc  { font-size: 13px; color: var(--text-3); line-height: 1.65; margin-bottom: 28px; }
+.upload-cta {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 28px; background: var(--indigo); color: white;
+  border-radius: 10px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s; font-family: inherit; border: none;
+}
+.upload-cta:hover { background: #b91c1c; box-shadow: 0 4px 14px rgba(220,38,38,0.25); transform: translateY(-1px); }
+#fileInput { display: none; }
+.upload-or { margin: 16px 0; font-size: 12px; color: var(--text-4); }
+.btn-sample {
+  width: 100%; padding: 10px; background: transparent;
+  color: var(--text-3); border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all 0.18s;
+}
+.btn-sample:hover { border-color: var(--indigo-md); color: var(--indigo); background: var(--indigo-lt); }
+.upload-hint { margin-top: 14px; font-size: 11px; color: var(--text-4); }
+
+/* ── DASHBOARD ── */
+#dashboard { display: none; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+/* Stats */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+.stat {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px;
+  box-shadow: var(--shadow-sm); transition: transform 0.18s, box-shadow 0.18s;
+  position: relative; overflow: hidden;
+}
+.stat:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.stat-accent {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.stat:nth-child(1) .stat-accent { background: linear-gradient(90deg,#7f1d1d,#b91c1c); }
+.stat:nth-child(2) .stat-accent { background: linear-gradient(90deg,#991b1b,#dc2626); }
+.stat:nth-child(3) .stat-accent { background: linear-gradient(90deg,#b91c1c,#ef4444); }
+.stat:nth-child(4) .stat-accent { background: linear-gradient(90deg,#dc2626,#f87171); }
+.stat-icon { font-size: 20px; margin-bottom: 10px; }
+.stat-val  { font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; margin-bottom: 4px; }
+.stat-lbl  { font-size: 12px; color: var(--text-3); font-weight: 500; }
+
+/* Charts */
+.charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+.chart-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); }
+.chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.chart-title { font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
+.chart-badge { font-size: 10px; font-weight: 600; color: var(--text-4); background: var(--bg); padding: 3px 8px; border-radius: 20px; border: 1px solid var(--border); }
+.chart-wrap { position: relative; height: 196px; }
+
+/* Filter bar */
+.filter-bar {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px; margin-bottom: 14px;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+.search-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-4); font-size: 14px; pointer-events: none; }
+.search-input {
+  width: 100%; padding: 9px 12px 9px 34px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 13px; color: var(--text);
+  outline: none; font-family: inherit; transition: border-color 0.18s, background 0.18s;
+}
+.search-input:focus { border-color: var(--indigo); background: var(--white); }
+.search-input::placeholder { color: var(--text-4); }
+.sel {
+  padding: 9px 32px 9px 12px; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 500; color: var(--text-2);
+  outline: none; cursor: pointer; appearance: none; font-family: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2394a3b8' d='M5 7L0.5 2.5h9z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+  transition: border-color 0.18s;
+}
+.sel:focus { border-color: var(--indigo); }
+.results-lbl { font-size: 12px; color: var(--text-4); white-space: nowrap; font-weight: 500; }
+
+/* Sort pills */
+.sort-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.sort-lbl { font-size: 11px; color: var(--text-4); font-weight: 600; margin-right: 2px; }
+.sort-pill {
+  padding: 5px 13px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--border); background: var(--white);
+  color: var(--text-3); font-family: inherit; transition: all 0.16s;
+}
+.sort-pill:hover { border-color: var(--indigo-md); color: var(--indigo); }
+.sort-pill.active { background: var(--black); border-color: var(--black); color: white; }
+
+/* Table */
+.table-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+.table-topbar { padding: 16px 20px; border-bottom: 1px solid var(--border-sm); display: flex; align-items: center; justify-content: space-between; }
+.table-title { font-size: 14px; font-weight: 700; letter-spacing: -0.2px; }
+.page-of { font-size: 12px; color: var(--text-4); font-weight: 500; }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-4);
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  white-space: nowrap; cursor: pointer; user-select: none;
+}
+thead th:hover { color: var(--indigo); }
+tbody tr { border-bottom: 1px solid var(--border-sm); transition: background 0.12s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #fafbff; }
+td { padding: 12px 16px; vertical-align: middle; }
+
+/* Profile cell */
+.user-cell { display: flex; align-items: flex-start; gap: 10px; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; margin-top: 1px;
+}
+.user-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.user-handle { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.comment-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: var(--red); margin-top: 2px;
+}
+.comment-snippet {
+  font-size: 11.5px; color: var(--text-3); line-height: 1.4;
+  max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; border-bottom: 1px dashed transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+.comment-snippet:hover { color: var(--red); border-bottom-color: var(--red-md); }
+
+/* Comment tooltip */
+#comment-tooltip {
+  position: fixed; z-index: 9999; width: 380px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: var(--shadow-lg); pointer-events: auto;
+  opacity: 0; transform: translateY(6px) scale(0.97);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+#comment-tooltip.show { opacity: 1; transform: translateY(0) scale(1); }
+.tt-header {
+  padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border-sm);
+}
+.tt-avatar-sm {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white;
+}
+.tt-header-info { display: flex; flex-direction: column; gap: 3px; }
+.tt-handle { font-size: 13px; font-weight: 700; color: var(--text); }
+.tt-lang {
+  display: none; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+  width: fit-content;
+}
+.tt-lang.id { display: inline-flex; background: #fef3c7; color: #b45309; }
+.tt-body {
+  padding: 12px 14px; font-size: 12px; line-height: 1.7; color: var(--text-2);
+  max-height: 180px; overflow-y: auto;
+}
+.tt-translated {
+  padding: 10px 14px; border-top: 1px solid var(--border-sm);
+  font-size: 11px; color: var(--text-3);
+}
+.tt-tl-label {
+  font-size: 10px; font-weight: 600; color: var(--text-4);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
+}
+.tt-spinning {
+  display: inline-block; width: 10px; height: 10px;
+  border: 1.5px solid var(--border); border-top-color: var(--red);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+  margin-right: 4px; vertical-align: middle;
+}
+.tt-footer {
+  padding: 10px 14px; border-top: 1px solid var(--border-sm);
+  display: flex; justify-content: flex-end;
+}
+.tt-ig-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: var(--red); color: white;
+  border-radius: 8px; font-size: 12px; font-weight: 600;
+  text-decoration: none; transition: background 0.15s;
+}
+.tt-ig-btn:hover { background: #b91c1c; }
+
+/* IG link */
+.ig-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 500; color: var(--indigo);
+  text-decoration: none; padding: 4px 10px;
+  background: var(--indigo-lt); border-radius: 6px;
+  transition: all 0.16s; white-space: nowrap;
+}
+.ig-link:hover { background: var(--indigo-md); color: #4f46e5; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.cat-DesignCreative            { background: #fff7ed; color: #c2410c; }
+.cat-SoftwareDevelopment       { background: #ecfeff; color: #0e7490; }
+.cat-DigitalMarketingContent   { background: #fdf4ff; color: #9333ea; }
+.cat-BusinessSalesConsulting   { background: #f0fdf4; color: #15803d; }
+.cat-EngineeringTechnical      { background: #f1f5f9; color: #334155; }
+.cat-HealthcareScience         { background: #fef2f2; color: #dc2626; }
+.cat-VideoPhotoAudioProduction { background: #fef9c3; color: #a16207; }
+.cat-EducationResearch         { background: #eef2ff; color: #4f46e5; }
+.cat-HospitalityCulinary       { background: #fff1f2; color: #be123c; }
+.cat-OtherProfessionalServices { background: #f8fafc; color: #475569; }
+.cat-OtherUncategorized        { background: var(--bg); color: var(--text-4); }
+.cat-default                   { background: var(--bg); color: var(--text-3); }
+.ind-badge { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+
+/* Skills */
+.skills-wrap { display: flex; gap: 4px; flex-wrap: wrap; max-width: 240px; }
+.skill-tag { padding: 3px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; font-size: 10px; font-weight: 500; color: var(--text-3); white-space: nowrap; }
+
+/* Experience */
+.exp-high { background: #fef9c3; color: #a16207; }
+.exp-mid  { background: #ecfeff; color: #0e7490; }
+.exp-low  { background: #f0fdf4; color: #15803d; }
+.exp-none { background: var(--bg); color: var(--text-4); }
+
+/* No data */
+.no-data { text-align: center; padding: 56px 40px; color: var(--text-3); }
+.no-data-icon { font-size: 36px; margin-bottom: 12px; }
+.no-data-text { font-size: 14px; font-weight: 500; }
+.no-data-sub  { font-size: 12px; color: var(--text-4); margin-top: 4px; }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--border-sm); }
+.page-info { font-size: 12px; color: var(--text-4); font-weight: 500; }
+.page-btns { display: flex; gap: 4px; }
+.page-btn {
+  min-width: 32px; height: 32px; padding: 0 8px; border-radius: 7px;
+  border: 1.5px solid var(--border); background: var(--white); color: var(--text-2);
+  cursor: pointer; font-size: 12px; font-weight: 600; font-family: inherit;
+  transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+}
+.page-btn:hover:not(:disabled) { border-color: var(--indigo-md); color: var(--indigo); background: var(--indigo-lt); }
+.page-btn.active { background: var(--indigo); border-color: var(--indigo); color: white; }
+.page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Loading */
+.loading-overlay {
+  position: fixed; inset: 0; background: rgba(248,250,252,0.85);
+  backdrop-filter: blur(6px); display: none;
+  align-items: center; justify-content: center; flex-direction: column; gap: 14px; z-index: 200;
+}
+.loading-overlay.show { display: flex; }
+.spin { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--indigo); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--text-3); font-weight: 500; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+  padding: 13px 18px; font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg); transform: translateY(80px); opacity: 0;
+  transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1); z-index: 300;
+  max-width: 300px; color: var(--text);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-left: 3px solid #22c55e; }
+.toast.error   { border-left: 3px solid #ef4444; }
+
+/* Responsive */
+@media (max-width: 1100px) { .stats-row { grid-template-columns: repeat(2,1fr); } .charts-row { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px)  { #dashboard { padding: 16px; } .topbar { padding: 0 16px; } .stats-row { grid-template-columns: repeat(2,1fr); } .charts-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v4M10 14v4M2 10h4M14 10h4"/><circle cx="10" cy="10" r="3" fill="white" stroke="none"/><circle cx="10" cy="10" r="6.5"/></svg></div>
+    <div>
+      <div class="brand-name">The Movement <span style="color:var(--red)">#IndonesiaIsUnderpriced</span></div>
+      <div style="font-size:10px;color:var(--text-4);font-weight:500;margin-top:1px">by The Innovators Studio</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="chip" id="headerCount" style="display:none">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" fill="currentColor" opacity=".6"/><path d="M1.5 10c0-2.485 2.015-4.5 4.5-4.5S10.5 7.515 10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="headerCountNum">0</span> profiles
+    </span>
+    <button class="btn btn-outline" id="exportBtn" style="display:none" onclick="exportFiltered()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Export CSV
+    </button>
+    <label class="btn btn-primary" for="fileInput" style="cursor:pointer">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 9V1M4 4L7 1l3 3M2 11h10" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Upload CSV
+    </label>
+    <input type="file" id="fileInput" accept=".csv" />
+  </div>
+</header>
+
+<!-- UPLOAD ZONE -->
+<div id="uploadZone">
+  <div class="upload-wrap">
+    <div class="upload-card" id="dropZone">
+      <div class="upload-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--red)"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg></div>
+      <div class="upload-title">Upload Scraping Results</div>
+      <div class="upload-desc">
+        Drag & drop your CSV file here, or click the button below.<br>
+        The dashboard will automatically visualize all talent data.
+      </div>
+      <label class="upload-cta" for="fileInput">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 9.5V1.5M4.5 4.5L7.5 1.5l3 3M2 12h11" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Choose CSV File
+      </label>
+      <div class="upload-or">or</div>
+      <button class="btn-sample" onclick="loadSampleData()">Try with 15 sample profiles</button>
+      <div class="upload-hint">Format: CSV from TIS Instagram Comment Scraper · UTF-8</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat"><div class="stat-accent"></div><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 20c0-4.418 3.134-8 7-8s7 3.582 7 8"/><circle cx="18" cy="8" r="2.5" opacity=".6"/><path d="M22 20c0-3.314-1.79-6-4-6" opacity=".6"/></svg></div><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total Profiles</div></div>
+    <div class="stat"><div class="stat-accent"></div><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="1.5"/><path d="M7 7V5a5 5 0 0110 0v2"/><path d="M9 12h6M9 16h4"/></svg></div><div class="stat-val" id="statIndustries">0</div><div class="stat-lbl">Unique Industries</div></div>
+    <div class="stat"><div class="stat-accent"></div><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="stat-val" id="statSkills">0</div><div class="stat-lbl">Unique Skills</div></div>
+    <div class="stat"><div class="stat-accent"></div><div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div><div class="stat-val" id="statExp">—</div><div class="stat-lbl">Avg. Experience</div></div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Category</div><div class="chart-badge" id="catBadge">—</div></div>
+      <div class="chart-wrap"><canvas id="chartCategory"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Industry</div><div class="chart-badge" id="indBadge">—</div></div>
+      <div class="chart-wrap"><canvas id="chartIndustry"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">Top Skills</div><div class="chart-badge" id="skillsBadge">—</div></div>
+      <div class="chart-wrap"><canvas id="chartSkills"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" id="searchInput" placeholder="Search by name, skill, or industry..." oninput="applyFilters()" />
+    </div>
+    <select class="sel" id="filterCategory" onchange="applyFilters()">
+      <option value="">All Categories</option>
+    </select>
+    <select class="sel" id="filterIndustry" onchange="applyFilters()">
+      <option value="">All Industries</option>
+    </select>
+    <select class="sel" id="filterExp" onchange="applyFilters()">
+      <option value="">All Experience</option>
+      <option value="0">Not mentioned</option>
+      <option value="1">1–2 years</option>
+      <option value="3">3–5 years</option>
+      <option value="6">6–10 years</option>
+      <option value="10">10+ years</option>
+    </select>
+    <span class="results-lbl" id="resultsCount">0 results</span>
+  </div>
+
+  <!-- Sort -->
+  <div class="sort-row">
+    <span class="sort-lbl">Sort by:</span>
+    <button class="sort-pill active" data-sort="name"       onclick="setSort(this)">Name A–Z</button>
+    <button class="sort-pill"        data-sort="category"   onclick="setSort(this)">Category</button>
+    <button class="sort-pill"        data-sort="industry"   onclick="setSort(this)">Industry</button>
+    <button class="sort-pill"        data-sort="experience" onclick="setSort(this)">Experience ↓</button>
+    <button class="sort-pill"        data-sort="skills"     onclick="setSort(this)">Most Skills</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-topbar">
+      <div class="table-title">Profile Directory</div>
+      <div class="page-of" id="pageLabel"></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Profile</th>
+            <th>Instagram</th>
+            <th>Category</th>
+            <th>Industry</th>
+            <th>Skills</th>
+            <th>Age</th>
+            <th>Experience</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="page-info" id="pageInfo"></div>
+      <div class="page-btns" id="pageBtns"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Comment tooltip -->
+<div id="comment-tooltip">
+  <div class="tt-header">
+    <div class="tt-avatar-sm" id="tt-avatar-sm"></div>
+    <div class="tt-header-info">
+      <div class="tt-handle" id="tt-handle"></div>
+      <div class="tt-lang id" id="tt-lang">🇮🇩 Indonesia</div>
+    </div>
+  </div>
+  <div class="tt-body" id="tt-body"></div>
+  <div class="tt-translated" id="tt-translated" style="display:none">
+    <div class="tt-tl-label">🌐 English translation</div>
+    <div id="tt-tl-text"></div>
+  </div>
+  <div class="tt-footer">
+    <a class="tt-ig-btn" id="tt-ig-link" href="#" target="_blank" rel="noopener noreferrer">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="3"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+      Open on Instagram
+    </a>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spin"></div>
+  <div class="loading-text">Processing data...</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let allData = [], filteredData = [];
+let currentPage = 1;
+const PAGE_SIZE = 15;
+let sortKey = 'name', sortDir = 1;
+let charts = {};
+
+// ── TRANSLATION CACHE ──
+const translCache = new Map();
+
+// ── INDONESIAN WORD DETECTOR ──
+const ID_PATTERN = /\b(saya|kami|adalah|dengan|untuk|yang|ini|itu|dan|atau|juga|bisa|sudah|akan|dari|ke|di|pada|oleh|gue|aku|gw|kita|mereka|kalian|namun|tapi|tetapi|karena|kalau|jika|sudah|belum|masih|lebih|seperti|sangat|sekali|hanya|lagi|kamu|anda|sini|sana|buat|dong|bang|ya(?:\s|$)|loh|kan|nih|tau|mau|bikin|kerja|baru|sama|baik|besar|kecil|orang|kami|diri|jadi|bagi|pengalaman|tahun|bulan|tentang|karya|dunia|bidang|project|proyek)\b/i;
+
+function isIndonesian(text) {
+  if (!text || text.length < 20) return false;
+  const matches = (text.match(ID_PATTERN) || []).length;
+  return matches >= 2;
+}
+
+async function getTranslation(text) {
+  const key = text.slice(0, 500);
+  if (translCache.has(key)) return translCache.get(key);
+  try {
+    const r = await fetch(
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(key)}&langpair=id|en&de=tis@dashboard.local`
+    );
+    const d = await r.json();
+    const out = d?.responseData?.translatedText || null;
+    // MyMemory sometimes returns the input back if it's already English
+    const result = out && out.toLowerCase() !== key.toLowerCase() ? out : null;
+    translCache.set(key, result);
+    return result;
+  } catch {
+    translCache.set(key, null);
+    return null;
+  }
+}
+
+// ── TOOLTIP ──
+const tooltip      = document.getElementById('comment-tooltip');
+const ttAvatarSm   = document.getElementById('tt-avatar-sm');
+const ttHandleEl   = document.getElementById('tt-handle');
+const ttLangEl     = document.getElementById('tt-lang');
+const ttBody       = document.getElementById('tt-body');
+const ttTranslated = document.getElementById('tt-translated');
+const ttTlText     = document.getElementById('tt-tl-text');
+const ttIgLink     = document.getElementById('tt-ig-link');
+let ttTimeout      = null;
+let ttHideTimeout  = null;
+
+function positionTooltip(el) {
+  const rect = el.getBoundingClientRect();
+  const tw = 380, th = 300, margin = 12;
+  let left = rect.left;
+  // Prefer above so it doesn't block rows below
+  let top = rect.top - th - margin;
+  if (top < margin) top = rect.bottom + margin; // fallback: below
+
+  if (left + tw > window.innerWidth - margin) left = window.innerWidth - tw - margin;
+  if (left < margin) left = margin;
+
+  tooltip.style.left = left + 'px';
+  tooltip.style.top  = top  + 'px';
+}
+
+async function showTooltip(el, handle, comment, igUrl, color, initials) {
+  clearTimeout(ttHideTimeout);
+  const indonesian = isIndonesian(comment);
+
+  ttAvatarSm.style.background = color || '#6366f1';
+  ttAvatarSm.textContent = initials || '??';
+  ttHandleEl.textContent = handle;
+  ttLangEl.style.display = indonesian ? 'inline-flex' : 'none';
+  ttBody.textContent = comment;
+  ttTranslated.style.display = 'none';
+  ttTlText.textContent = '';
+  ttIgLink.href = igUrl || '#';
+
+  positionTooltip(el);
+  tooltip.classList.add('show');
+
+  if (indonesian) {
+    ttTranslated.style.display = 'block';
+    ttTlText.innerHTML = '<span class="tt-spinning"></span> Translating...';
+
+    const translated = await getTranslation(comment);
+    if (translated && tooltip.classList.contains('show')) {
+      ttTlText.textContent = translated;
+    } else if (!translated) {
+      ttTranslated.style.display = 'none';
+    }
+  }
+}
+
+function hideTooltip() {
+  ttHideTimeout = setTimeout(() => tooltip.classList.remove('show'), 180);
+}
+
+// Keep tooltip open when hovering into it
+tooltip.addEventListener('mouseenter', () => clearTimeout(ttHideTimeout));
+tooltip.addEventListener('mouseleave', () => hideTooltip());
+
+// Delegate hover on comment snippets
+document.addEventListener('mouseover', e => {
+  const el = e.target.closest('.comment-snippet');
+  if (!el) return;
+  clearTimeout(ttTimeout);
+  ttTimeout = setTimeout(() => {
+    showTooltip(el, el.dataset.handle, el.dataset.comment, el.dataset.igurl, el.dataset.color, el.dataset.initials);
+  }, 150);
+});
+
+document.addEventListener('mouseout', e => {
+  const fromSnippet = e.target.closest('.comment-snippet');
+  const toTooltip   = e.relatedTarget?.closest('#comment-tooltip');
+  if (fromSnippet && !toTooltip) {
+    clearTimeout(ttTimeout);
+    hideTooltip();
+  }
+});
+
+// Hide on scroll so tooltip doesn't block rows
+document.addEventListener('scroll', () => { clearTimeout(ttTimeout); tooltip.classList.remove('show'); }, true);
+
+// Click snippet → open IG profile
+document.addEventListener('click', e => {
+  const el = e.target.closest('.comment-snippet');
+  if (!el) return;
+  const url = el.dataset.igurl;
+  if (url) window.open(url, '_blank', 'noopener');
+});
+
+// ── AVATAR COLORS ──
+const AV_COLORS = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#14b8a6'];
+function avColor(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+  return AV_COLORS[Math.abs(h) % AV_COLORS.length];
+}
+
+const P = ['#f44336','#009688','#9c27b0','#2196f3','#ff5722','#4caf50','#e91e63','#00bcd4','#ff9800','#795548'];
+
+// ── FILE INPUT ──
+document.getElementById('fileInput').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) processCSV(f);
+  e.target.value = '';
+});
+
+// ── DRAG & DROP ──
+const dropZone = document.getElementById('dropZone');
+['dragover','dragenter'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drag-over'); }));
+['dragleave','dragend'].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.remove('drag-over')));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f?.name?.endsWith('.csv')) processCSV(f);
+  else toast('Please upload a .csv file', 'error');
+});
+
+// ── PROCESS CSV ──
+function processCSV(file) {
+  showLoading();
+  Papa.parse(file, {
+    header: true, skipEmptyLines: true,
+    complete: r => {
+      hideLoading();
+      if (!r.data.length) { toast('CSV is empty or unrecognized format', 'error'); return; }
+      allData = r.data.map(normalizeRow);
+      initDashboard();
+      toast(`✅ ${allData.length} profiles loaded!`);
+    },
+    error: () => { hideLoading(); toast('Failed to read CSV', 'error'); }
+  });
+}
+
+const CAT_MAP = { 'Karyawan':'Employee', 'Lainnya':'Other', 'Agensi':'Agency' };
+const IND_MAP = {
+  'Desain & Kreatif':'Design & Creative', 'Teknologi':'Technology',
+  'Kesehatan':'Healthcare', 'Keuangan':'Finance', 'Konsultan':'Consulting',
+  'Pendidikan':'Education', 'Properti':'Real Estate', 'Lainnya':'Other',
+  'F&B':'F&B',
+};
+
+function normalizeRow(r) {
+  const rawExp = (r.years_of_experience_skills || r.experience || r.Experience || 'Not mentioned').toString();
+  const rawInd = r.original_industry || r.industry || r.Industry || '';
+  return {
+    username:    r.username || r.Username || '',
+    name:        r.name || r.Name || r.username || '',
+    ig_handle:   r.ig_handle || '@' + r.username || '',
+    ig_url:      r.ig_url || `https://www.instagram.com/${r.username}/`,
+    category:    (r.skill_category || r.skill_category_en || '').trim() || 'Other',
+    industry:    IND_MAP[rawInd] || rawInd || '',
+    skills:      ((r.skills_detailed || r.skills_detected_en || r.skills || '').replace(/not detected|tidak terdeteksi/gi, '').trim()),
+    experience:  (() => {
+      const cleaned = rawExp.replace(/Tidak disebutkan/gi, 'Not mentioned').replace(/\btahun\b/gi, 'years').replace(/\bthn\b/gi, 'years');
+      // Compound values like "11 years, 4 years" → take the highest
+      const parts = cleaned.split(',').map(s => s.trim()).filter(Boolean);
+      if (parts.length <= 1) return cleaned;
+      return parts.reduce((best, p) => {
+        const n = parseInt(p.match(/(\d+)/)?.[1] || '0');
+        const b = parseInt(best.match(/(\d+)/)?.[1] || '0');
+        return n > b ? p : best;
+      }, parts[0]);
+    })(),
+    age:         (r.age || '').toString().replace(/Tidak disebutkan/gi, 'Not mentioned').trim() || 'Not mentioned',
+    raw_comment: r.original_message_cleaned || r.raw_comment || r['Raw Comment'] || '',
+    message_en:  r.message_english || '',
+  };
+}
+
+// ── SAMPLE DATA ──
+function loadSampleData() {
+  allData = [
+    {username:'budi_design',name:'Budi Santoso',ig_handle:'@budi_design',ig_url:'https://instagram.com/budi_design',category:'Freelancer',industry:'Design & Creative',skills:'figma, ui/ux, branding, logo design',experience:'3+ years',raw_comment:'Hi! I\'m a freelance UI/UX designer with 3 years of experience, specialising in Figma and branding.'},
+    {username:'rina_dev',name:'Rina Agustina',ig_handle:'@rina_dev',ig_url:'https://instagram.com/rina_dev',category:'Developer',industry:'Technology',skills:'react, nextjs, nodejs, typescript',experience:'5+ years',raw_comment:'Full-stack developer with 5 years of experience. React, Next.js, Node.js.'},
+    {username:'studio_kreatif',name:'Studio Kreatif ID',ig_handle:'@studio_kreatif',ig_url:'https://instagram.com/studio_kreatif',category:'Agency',industry:'Design & Creative',skills:'branding, logo design, photoshop, illustrator',experience:'7+ years',raw_comment:'Agency kreatif Bandung, 7 tahun pengalaman. Spesialisasi branding & logo.'},
+    {username:'maya_content',name:'Maya Putri',ig_handle:'@maya_content',ig_url:'https://instagram.com/maya_content',category:'Content Creator',industry:'Digital Marketing',skills:'content writing, social media, canva, copywriting',experience:'2+ years',raw_comment:'Content creator 2 tahun, fokus di IG & TikTok. Bisa copywriting juga.'},
+    {username:'arif_foto',name:'Arif Fotografer',ig_handle:'@arif_foto',ig_url:'https://instagram.com/arif_foto',category:'Freelancer',industry:'Media & Entertainment',skills:'photography, videography, premiere, lightroom',experience:'4+ years',raw_comment:'Photographer & videographer freelancer with 4 years of experience. Wedding & commercial.'},
+    {username:'digitalagency_jkt',name:'Digital Agency Jakarta',ig_handle:'@digitalagency_jkt',ig_url:'https://instagram.com/digitalagency_jkt',category:'Agency',industry:'Digital Marketing',skills:'seo, google ads, meta ads, copywriting, email marketing',experience:'8+ years',raw_comment:'Digital agency based in Jakarta. SEO, Google Ads, Meta Ads. 8 years of experience.'},
+    {username:'sari_motion',name:'Sari Wulandari',ig_handle:'@sari_motion',ig_url:'https://instagram.com/sari_motion',category:'Freelancer',industry:'Design & Creative',skills:'motion graphic, after effects, illustrator, canva',experience:'3+ years',raw_comment:'Motion graphic designer. After Effects & Illustrator. 3 tahun pengalaman.'},
+    {username:'tech_startup_bdg',name:'Tech Startup Bandung',ig_handle:'@tech_startup_bdg',ig_url:'https://instagram.com/tech_startup_bdg',category:'Startup',industry:'Technology',skills:'flutter, python, postgresql, docker',experience:'5+ years',raw_comment:'Tech startup in Bandung, mobile & web development. Flutter, Python.'},
+    {username:'kevin_seo',name:'Kevin Prasetyo',ig_handle:'@kevin_seo',ig_url:'https://instagram.com/kevin_seo',category:'Freelancer',industry:'Digital Marketing',skills:'seo, content writing, wordpress, google analytics',experience:'6+ years',raw_comment:'SEO specialist with 6 years of experience. On-page, off-page, technical SEO.'},
+    {username:'lina_brand',name:'Lina Marlina',ig_handle:'@lina_brand',ig_url:'https://instagram.com/lina_brand',category:'Freelancer',industry:'Design & Creative',skills:'branding, logo design, canva, figma',experience:'2+ years',raw_comment:'Brand designer 2 tahun. Spesialis logo dan brand identity.'},
+    {username:'webdev_anto',name:'Anto Developer',ig_handle:'@webdev_anto',ig_url:'https://instagram.com/webdev_anto',category:'Developer',industry:'Technology',skills:'laravel, mysql, vue, php',experience:'4+ years',raw_comment:'Web developer dengan Laravel & Vue. 4 tahun, handle 20+ project.'},
+    {username:'foto_wedding_id',name:'Wedding Photo Studio',ig_handle:'@foto_wedding_id',ig_url:'https://instagram.com/foto_wedding_id',category:'Agency',industry:'Media & Entertainment',skills:'photography, videography, video editing, lightroom',experience:'9+ years',raw_comment:'Wedding photography studio in Surabaya. 9 years, 500+ weddings.'},
+    {username:'hendra_ux',name:'Hendra Gunawan',ig_handle:'@hendra_ux',ig_url:'https://instagram.com/hendra_ux',category:'Employee',industry:'Technology',skills:'figma, ui/ux, user research, design system',experience:'3+ years',raw_comment:'Product designer at a Jakarta startup. 3 years focusing on UX research & design systems.'},
+    {username:'copy_keren',name:'Dian Copywriter',ig_handle:'@copy_keren',ig_url:'https://instagram.com/copy_keren',category:'Freelancer',industry:'Digital Marketing',skills:'copywriting, email marketing, content writing, storytelling',experience:'5+ years',raw_comment:'Senior copywriter 5 tahun. Brand voice, email marketing, landing page.'},
+    {username:'toko_digital_jkt',name:'Toko Digital Jakarta',ig_handle:'@toko_digital_jkt',ig_url:'https://instagram.com/toko_digital_jkt',category:'Agency',industry:'E-commerce',skills:'meta ads, tiktok ads, copywriting, marketplace',experience:'3+ years',raw_comment:'E-commerce agency Jakarta. Spesialis performance marketing untuk marketplace.'},
+  ];
+  initDashboard();
+  toast('✨ Sample data loaded!');
+}
+
+// ── INIT ──
+function initDashboard() {
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('exportBtn').style.display = 'inline-flex';
+  document.getElementById('headerCount').style.display = 'inline-flex';
+  document.getElementById('headerCountNum').textContent = allData.length;
+  populateFilters();
+  renderCharts();
+  applyFilters();
+  updateStats();
+}
+
+// ── POPULATE FILTERS ──
+function populateFilters() {
+  const cats = [...new Set(allData.map(d => d.category).filter(Boolean))].sort();
+  const inds  = [...new Set(allData.map(d => d.industry).filter(Boolean))].sort();
+  const catSel = document.getElementById('filterCategory');
+  catSel.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option>${esc(c)}</option>`).join('');
+  const indSel = document.getElementById('filterIndustry');
+  indSel.innerHTML = '<option value="">All Industries</option>' + inds.map(i => `<option>${esc(i)}</option>`).join('');
+}
+
+// ── STATS ──
+function updateStats() {
+  document.getElementById('statTotal').textContent = allData.length;
+  const inds = new Set(allData.map(d => d.industry).filter(b => b && b !== 'Other' && b !== 'Lainnya'));
+  document.getElementById('statIndustries').textContent = inds.size;
+  const skills = new Set();
+  allData.forEach(d => d.skills.split(',').forEach(s => s.trim() && skills.add(s.trim().toLowerCase())));
+  document.getElementById('statSkills').textContent = skills.size;
+  const nums = allData.map(d => parseInt(d.experience?.match(/(\d+)/)?.[1] || '0')).filter(n => n > 0);
+  const avg  = nums.length ? Math.round(nums.reduce((a,b)=>a+b,0)/nums.length) : 0;
+  document.getElementById('statExp').textContent = avg ? `~${avg} yrs` : 'N/A';
+}
+
+// ── CHARTS ──
+function renderCharts() {
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  // Split compound categories (e.g. "A, B") and count each individually
+  const catCount = {};
+  allData.forEach(d => {
+    (d.category || 'Other').split(',').forEach(c => {
+      const key = c.trim() || 'Other';
+      catCount[key] = (catCount[key] || 0) + 1;
+    });
+  });
+  const indCount  = countBy(allData, 'industry');
+  const skillCount = {};
+  allData.forEach(d => d.skills.split(',').forEach(s => {
+    const sk = s.trim().toLowerCase();
+    if (sk && sk !== 'tidak terdeteksi' && sk !== 'not detected') skillCount[sk] = (skillCount[sk]||0)+1;
+  }));
+  const topSkills  = Object.entries(skillCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const catEntries = Object.entries(catCount).sort((a,b)=>b[1]-a[1]);
+  const indEntries = Object.entries(indCount).sort((a,b)=>b[1]-a[1]).slice(0,7);
+
+  document.getElementById('catBadge').textContent   = catEntries.length + ' categories';
+  document.getElementById('indBadge').textContent   = indEntries.length + ' industries';
+  document.getElementById('skillsBadge').textContent = topSkills.length + ' skills';
+
+  const tip = { backgroundColor:'#fff', borderColor:'#e2e8f0', borderWidth:1, titleColor:'#0f172a', bodyColor:'#64748b', padding:10, cornerRadius:8 };
+
+  charts.cat = new Chart(document.getElementById('chartCategory'), {
+    type: 'doughnut',
+    data: { labels: catEntries.map(e=>e[0]), datasets: [{ data: catEntries.map(e=>e[1]), backgroundColor: P, borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins: { legend:{ position:'bottom', labels:{ color:'#64748b', font:{size:10,family:'Inter'}, padding:12, boxWidth:8, usePointStyle:true, pointStyle:'circle' } }, tooltip:tip } }
+  });
+
+  charts.ind = new Chart(document.getElementById('chartIndustry'), {
+    type: 'bar',
+    data: { labels: indEntries.map(e=>e[0]), datasets: [{ data: indEntries.map(e=>e[1]), backgroundColor: P, borderRadius:5, borderSkipped:false, maxBarThickness:18 }] },
+    options: { responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false}, tooltip:tip }, scales:{ x:{ grid:{color:'#f1f5f9'}, ticks:{color:'#94a3b8',font:{size:10,family:'Inter'}}, border:{display:false} }, y:{ grid:{display:false}, ticks:{color:'#334155',font:{size:10,family:'Inter'}}, border:{display:false} } } }
+  });
+
+  charts.skills = new Chart(document.getElementById('chartSkills'), {
+    type: 'bar',
+    data: { labels: topSkills.map(e=>e[0]), datasets: [{ data: topSkills.map(e=>e[1]), backgroundColor: P.slice(2), borderRadius:5, borderSkipped:false, maxBarThickness:18 }] },
+    options: { responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false}, tooltip:tip }, scales:{ x:{ grid:{color:'#f1f5f9'}, ticks:{color:'#94a3b8',font:{size:10,family:'Inter'}}, border:{display:false} }, y:{ grid:{display:false}, ticks:{color:'#334155',font:{size:10,family:'Inter'}}, border:{display:false} } } }
+  });
+}
+
+function countBy(arr,key) { return arr.reduce((acc,d)=>{ const v=d[key]||'Other'; acc[v]=(acc[v]||0)+1; return acc; },{}); }
+
+// ── FILTERS ──
+function applyFilters() {
+  const q   = document.getElementById('searchInput').value.toLowerCase();
+  const cat = document.getElementById('filterCategory').value;
+  const ind = document.getElementById('filterIndustry').value;
+  const exp = document.getElementById('filterExp').value;
+
+  filteredData = allData.filter(d => {
+    if (cat && d.category !== cat) return false;
+    if (ind && d.industry !== ind) return false;
+    if (exp !== '') {
+      const n = parseInt(d.experience?.match(/(\d+)/)?.[1] || '0');
+      if (exp==='0'  && n!==0)        return false;
+      if (exp==='1'  && (n<1||n>2))   return false;
+      if (exp==='3'  && (n<3||n>5))   return false;
+      if (exp==='6'  && (n<6||n>10))  return false;
+      if (exp==='10' && n<10)         return false;
+    }
+    if (q) {
+      const hay = [d.name,d.username,d.skills,d.industry,d.category,d.raw_comment].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  sortData(); currentPage = 1; renderTable();
+  document.getElementById('resultsCount').textContent = `${filteredData.length} results`;
+}
+
+// ── SORT ──
+function setSort(el) {
+  document.querySelectorAll('.sort-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const key = el.dataset.sort;
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = key === 'experience' || key === 'skills' ? -1 : 1; }
+  sortData(); currentPage = 1; renderTable();
+}
+
+function sortData() {
+  filteredData.sort((a,b) => {
+    let va = a[sortKey]||'', vb = b[sortKey]||'';
+    if (sortKey==='experience') { va=parseInt(a.experience?.match(/(\d+)/)?.[1]||'0'); vb=parseInt(b.experience?.match(/(\d+)/)?.[1]||'0'); }
+    else if (sortKey==='skills') { va=a.skills.split(',').filter(s=>s.trim()).length; vb=b.skills.split(',').filter(s=>s.trim()).length; }
+    if (va<vb) return -1*sortDir;
+    if (va>vb) return  1*sortDir;
+    return 0;
+  });
+}
+
+// ── TABLE ──
+function renderTable() {
+  const start  = (currentPage - 1) * PAGE_SIZE;
+  const page   = filteredData.slice(start, start + PAGE_SIZE);
+  const tbody  = document.getElementById('tableBody');
+
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="no-data"><div class="no-data-icon">🔍</div><div class="no-data-text">No profiles match your filters</div><div class="no-data-sub">Try adjusting the search or filter options</div></div></td></tr>`;
+    ['pageInfo','pageLabel'].forEach(id => document.getElementById(id).textContent = '');
+    document.getElementById('pageBtns').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = page.map(d => {
+    const uname     = (d.ig_handle || d.username || '').replace(/^@/, '') || d.username || '??';
+    const initials  = uname.substring(0, 2).toUpperCase();
+    const color     = avColor(d.username || d.name || '');
+    const primaryCat = (d.category || '').split(',')[0].trim();
+    const catClass  = 'cat-' + (primaryCat?.replace(/[\s&,\/]/g,'') || 'default');
+    const skillArr  = d.skills.split(',').map(s=>s.trim()).filter(Boolean);
+    const expNum    = parseInt(d.experience?.match(/(\d+)/)?.[1] || '0');
+    const expClass  = expNum >= 6 ? 'exp-high' : expNum >= 3 ? 'exp-mid' : expNum >= 1 ? 'exp-low' : 'exp-none';
+
+    const handle   = d.ig_handle || '@' + d.username;
+    const comment  = d.raw_comment || '';
+    const displayMsg = (d.message_en || comment);
+    const snippet  = displayMsg.length > 60 ? displayMsg.slice(0, 60) + '…' : displayMsg;
+
+    return `
+    <tr>
+      <td>
+        <div class="user-cell">
+          <div class="avatar" style="background:${color}">${initials}</div>
+          <div class="user-info">
+            <div class="comment-label">username</div>
+            <div class="user-handle">${esc(handle)}</div>
+            <div class="comment-label">message</div>
+            <div class="comment-snippet"
+                 data-handle="${esc(handle)}"
+                 data-comment="${esc(displayMsg)}"
+                 data-igurl="${esc(d.ig_url)}"
+                 data-color="${esc(color)}"
+                 data-initials="${esc(initials)}">${esc(snippet)}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <a class="ig-link" href="${esc(d.ig_url)}" target="_blank" rel="noopener noreferrer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="3"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          ${esc(handle)}
+        </a>
+      </td>
+      <td>${primaryCat && primaryCat !== 'Other / Uncategorized' && primaryCat !== 'Other' ? `<span class="badge ${catClass}">${esc(primaryCat)}</span>` : ''}</td>
+      <td>${d.industry && d.industry !== 'Other' ? `<span class="badge ind-badge">${esc(d.industry)}</span>` : ''}</td>
+      <td>
+        <div class="skills-wrap">
+          ${skillArr.map(s=>`<span class="skill-tag">${esc(s)}</span>`).join('')}
+        </div>
+      </td>
+      <td>${d.age && d.age !== 'Not mentioned' ? `<span class="badge exp-none">${esc(d.age)}</span>` : ''}</td>
+      <td><span class="badge ${expClass}">${esc(d.experience || 'N/A')}</span></td>
+    </tr>`;
+  }).join('');
+
+  const total      = filteredData.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const end        = Math.min(start + PAGE_SIZE, total);
+
+  document.getElementById('pageInfo').textContent  = `${start+1}–${end} of ${total} profiles`;
+  document.getElementById('pageLabel').textContent = `Page ${currentPage} / ${totalPages}`;
+
+  const maxBtns = 7, half = Math.floor(maxBtns/2);
+  let startP = Math.max(1, currentPage - half);
+  let endP   = Math.min(totalPages, startP + maxBtns - 1);
+  if (endP - startP < maxBtns - 1) startP = Math.max(1, endP - maxBtns + 1);
+
+  const btns = [];
+  btns.push(`<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`);
+  for (let p = startP; p <= endP; p++)
+    btns.push(`<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`);
+  btns.push(`<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`);
+  document.getElementById('pageBtns').innerHTML = btns.join('');
+}
+
+function goPage(p) {
+  const total = Math.ceil(filteredData.length / PAGE_SIZE);
+  if (p < 1 || p > total) return;
+  currentPage = p;
+  renderTable();
+  document.querySelector('.table-card').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ── EXPORT ──
+function exportFiltered() {
+  if (!filteredData.length) { toast('No data to export', 'error'); return; }
+  const headers = ['username','name','ig_handle','ig_url','category','industry','skills','age','experience','raw_comment'];
+  const rows = filteredData.map(d => headers.map(h => `"${String(d[h]||'').replace(/"/g,'""')}"`).join(','));
+  const csv  = '﻿' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href:url, download:`TIS_${new Date().toISOString().slice(0,10)}.csv` });
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast(`✅ ${filteredData.length} rows exported`);
+}
+
+// ── UTILS ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast show ${type}`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ── AUTO-LOAD CSV ──
+window.addEventListener('DOMContentLoaded', () => {
+  showLoading();
+  fetch('./TIS_cleaned.csv')
+    .then(r => { if (!r.ok) throw new Error('not found'); return r.text(); })
+    .then(text => {
+      Papa.parse(text, {
+        header: true, skipEmptyLines: true,
+        complete: r => {
+          hideLoading();
+          if (!r.data.length) return;
+          allData = r.data.map(normalizeRow);
+          initDashboard();
+          toast(`✅ ${allData.length} profiles loaded`);
+        }
+      });
+    })
+    .catch(() => { hideLoading(); });
+});
+</script>
+</body>
+</html>

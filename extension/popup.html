@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TIS Scraper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 320px;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #ffffff;
+      color: #0f172a;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      width: 38px; height: 38px;
+      background: #6366f1;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+    }
+
+    .header-text .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.2px;
+    }
+
+    .header-text .subtitle {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 1px;
+    }
+
+    /* ── BODY ── */
+    .body { padding: 16px; }
+
+    /* Status pill */
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .status-pill.ready  { border-color: #bbf7d0; background: #f0fdf4; }
+    .status-pill.error  { border-color: #fecaca; background: #fef2f2; }
+    .status-pill.loading { border-color: #e0e7ff; background: #eef2ff; }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      flex-shrink: 0;
+    }
+    .status-pill.ready  .status-dot { background: #22c55e; box-shadow: 0 0 0 3px #dcfce7; animation: pulse 2s infinite; }
+    .status-pill.error  .status-dot { background: #ef4444; }
+    .status-pill.loading .status-dot { background: #6366f1; animation: pulse 0.8s infinite; }
+
+    @keyframes pulse {
+      0%,100% { opacity:1; }
+      50% { opacity:0.5; }
+    }
+
+    .status-info { flex: 1; min-width: 0; }
+    .status-text { font-size: 12px; font-weight: 500; color: #475569; }
+    .status-pill.ready  .status-text { color: #16a34a; }
+    .status-pill.error  .status-text { color: #dc2626; }
+    .status-pill.loading .status-text { color: #4f46e5; }
+    .status-url { font-size: 10px; color: #94a3b8; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Result / Error banners */
+    .result-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 11px 13px;
+      margin-bottom: 14px;
+    }
+    .result-banner.show { display: flex; }
+    .result-num { font-size: 22px; font-weight: 800; color: #16a34a; line-height: 1; }
+    .result-label { font-size: 11px; color: #4ade80; }
+    .result-sub { font-size: 10px; color: #86efac; margin-top: 1px; }
+
+    .error-banner {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 11px;
+      color: #dc2626;
+      line-height: 1.5;
+    }
+    .error-banner.show { display: block; }
+
+    /* Section label */
+    .label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 8px;
+    }
+
+    /* Slider */
+    .slider-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+
+    .slider-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .slider-name { font-size: 12px; font-weight: 500; color: #334155; }
+    .slider-val {
+      font-size: 13px; font-weight: 700;
+      color: #6366f1;
+      background: #eef2ff;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #6366f1;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 6px rgba(99,102,241,0.35);
+    }
+    .slider-hint { font-size: 10px; color: #94a3b8; margin-top: 8px; }
+
+    /* Buttons */
+    .btn-main {
+      width: 100%;
+      padding: 12px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 8px;
+      font-family: inherit;
+      letter-spacing: -0.1px;
+    }
+    .btn-main:hover:not(:disabled) {
+      background: #4f46e5;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+    }
+    .btn-main:active:not(:disabled) { transform: translateY(0); }
+    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-main .spin {
+      display: inline-block;
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn-ghost {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: #6366f1;
+      border: 1.5px solid #e0e7ff;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 14px;
+      font-family: inherit;
+    }
+    .btn-ghost:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+
+    /* Steps */
+    .steps {
+      background: #fafafa;
+      border: 1px solid #f1f5f9;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .steps-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .step:last-child { margin-bottom: 0; }
+    .step-num {
+      width: 18px; height: 18px;
+      background: #6366f1;
+      color: white;
+      border-radius: 5px;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.5px;
+    }
+    .step-text { font-size: 11px; color: #64748b; line-height: 1.5; }
+
+    /* Footer */
+    .footer {
+      padding: 10px 16px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-brand { font-size: 10px; color: #cbd5e1; font-weight: 600; letter-spacing: 0.3px; }
+    .footer-ver { font-size: 10px; color: #cbd5e1; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-mark">🎯</div>
+  <div class="header-text">
+    <div class="title">TIS Scraper</div>
+    <div class="subtitle">Instagram Comment Extractor</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- Status -->
+  <div class="status-pill" id="statusPill">
+    <div class="status-dot"></div>
+    <div class="status-info">
+      <div class="status-text" id="statusText">Mengecek halaman...</div>
+      <div class="status-url" id="statusUrl"></div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-banner" id="resultCard">
+    <div>
+      <div class="result-num" id="resultCount">0</div>
+    </div>
+    <div>
+      <div class="result-label">profil diekstrak</div>
+      <div class="result-sub">CSV berhasil didownload ✓</div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-banner" id="errorCard"></div>
+
+  <!-- Slider -->
+  <div class="label">Pengaturan</div>
+  <div class="slider-card">
+    <div class="slider-row">
+      <span class="slider-name">Maks. klik "Load More"</span>
+      <span class="slider-val" id="maxLoadVal">30</span>
+    </div>
+    <input type="range" id="maxLoadSlider" min="5" max="100" value="30" step="5" />
+    <div class="slider-hint">Lebih tinggi = lebih banyak komentar, lebih lama</div>
+  </div>
+
+  <!-- Buttons -->
+  <button class="btn-main" id="scrapeBtn">🚀 Mulai Scraping</button>
+  <button class="btn-ghost" id="openDashboardBtn">📊 Buka Dashboard Visualisasi</button>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="steps-title">Cara Pakai</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Buka post Instagram TIS yang ingin discrape</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Klik <strong>Mulai Scraping</strong> dan tunggu</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">CSV otomatis terdownload ke komputer</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Upload CSV ke Dashboard untuk visualisasi</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-brand">TIS SCRAPER</span>
+  <span class="footer-ver">v1.0.0</span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
