@@ -1,0 +1,45 @@
+# ── SECURITY HEADERS ──
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.mymemory.translated.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+</IfModule>
+
+# ── DISABLE DIRECTORY LISTING ──
+Options -Indexes
+
+# ── BLOCK ACCESS TO SENSITIVE FILES ──
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|sql|bak|config|env)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# ── BLOCK COMMON ATTACK PATTERNS ──
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Block SQL injection attempts
+  RewriteCond %{QUERY_STRING} (union|select|insert|drop|delete|update|alter|create|exec|script|javascript|vbscript) [NC]
+  RewriteRule .* - [F,L]
+  # Block path traversal
+  RewriteCond %{REQUEST_URI} (\.\./|\.\.\\) [NC]
+  RewriteRule .* - [F,L]
+  # Block common vulnerability scanners
+  RewriteCond %{HTTP_USER_AGENT} (nikto|sqlmap|havij|nmap|masscan) [NC]
+  RewriteRule .* - [F,L]
+</IfModule>
+
+# ── FORCE HTTPS ──
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
