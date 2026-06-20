@@ -6,7 +6,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 <meta http-equiv="X-Frame-Options" content="DENY" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.mymemory.translated.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.mymemory.translated.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
 <title>The Movement #IndonesiaIsUnderpriced by The Innovators Studio</title>
 <link rel="icon" type="image/png" href="./tis-logo.png">
 <link rel="apple-touch-icon" href="./tis-logo.png">
@@ -14,8 +14,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lexend+Zetta:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root {
   --snow:      #F3F3F3;
@@ -953,7 +953,7 @@ function avColor(str) {
   return AV_COLORS[Math.abs(h) % AV_COLORS.length];
 }
 
-const P = ['#C62828','#00897B','#7B1FA2','#1976D2','#E64A19','#388E3C','#AD1457','#0097A7','#F57C00','#5D4037','#455A64','#6A1B9A'];
+const P = ['#E57373','#FFB74D','#FFD54F','#81C784','#64B5F6','#5C6BC0','#AB47BC','#F06292','#4DB6AC','#A1887F','#90A4AE','#CE93D8'];
 
 // ── FILE INPUT ──
 document.getElementById('fileInput').addEventListener('change', e => {
