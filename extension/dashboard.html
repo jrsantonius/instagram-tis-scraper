@@ -6,7 +6,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 <meta http-equiv="X-Frame-Options" content="DENY" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.mymemory.translated.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.mymemory.translated.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
 <title>The Movement #IndonesiaIsUnderpriced by The Innovators Studio</title>
 <link rel="icon" type="image/png" href="./tis-logo.png">
 <link rel="apple-touch-icon" href="./tis-logo.png">
@@ -14,6 +14,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lexend+Zetta:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root {
   --snow:      #F3F3F3;
@@ -89,6 +91,37 @@ body::before {
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.6);
 }
+
+/* ── EXPORT DROPDOWN ── */
+.export-wrap { position: relative; }
+.export-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--glass-hi);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px; padding: 6px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.5);
+  min-width: 180px; z-index: 200;
+  opacity: 0; transform: translateY(-4px) scale(0.97);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.export-menu.show {
+  opacity: 1; transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.export-opt {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 14px; border: none;
+  background: transparent; border-radius: 8px;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  color: var(--text-2); cursor: pointer; transition: background 0.12s;
+  text-align: left;
+}
+.export-opt:hover { background: rgba(0,0,0,0.04); }
+.export-opt svg { flex-shrink: 0; color: var(--silver); }
+.export-opt-label { display: flex; flex-direction: column; gap: 1px; }
+.export-opt-sub { font-size: 10px; color: var(--text-4); font-weight: 400; }
 
 /* ── TOPBAR ── */
 .topbar {
@@ -593,15 +626,24 @@ td { padding: 14px 16px; vertical-align: middle; }
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" fill="currentColor" opacity=".5"/><path d="M1.5 10c0-2.485 2.015-4.5 4.5-4.5S10.5 7.515 10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span id="headerCountNum">0</span> profiles
     </span>
-    <button class="btn btn-export" id="exportBtn" style="display:none" onclick="exportFiltered()">
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Export CSV
-    </button>
-    <label class="btn btn-upload" for="fileInput" style="cursor:pointer">
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 9V1M4 4L7 1l3 3M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Upload CSV
-    </label>
-    <input type="file" id="fileInput" accept=".csv" />
+    <div class="export-wrap" id="exportWrap" style="display:none">
+      <button class="btn btn-export" id="exportBtn" onclick="toggleExportMenu()">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export this data
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:2px"><path d="M2.5 3.5L5 6l2.5-2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="export-menu" id="exportMenu">
+        <button class="export-opt" onclick="exportPDF()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6M9 11h6"/></svg>
+          <div class="export-opt-label"><span>PDF Document</span><span class="export-opt-sub">Formatted report with table</span></div>
+        </button>
+        <button class="export-opt" onclick="exportCSV()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2M8 17h2M14 13h2M14 17h2"/></svg>
+          <div class="export-opt-label"><span>CSV Spreadsheet</span><span class="export-opt-sub">Raw data for Excel / Sheets</span></div>
+        </button>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept=".csv" style="display:none" />
   </div>
 </header>
 
@@ -980,7 +1022,7 @@ function loadSampleData() {
 function initDashboard() {
   document.getElementById('uploadZone').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
-  document.getElementById('exportBtn').style.display = 'inline-flex';
+  document.getElementById('exportWrap').style.display = '';
   document.getElementById('headerCount').style.display = 'inline-flex';
   document.getElementById('headerCountNum').textContent = allData.length;
   populateFilters();
@@ -1203,7 +1245,18 @@ function goPage(p) {
 }
 
 // ── EXPORT ──
-function exportFiltered() {
+const exportMenu = document.getElementById('exportMenu');
+
+function toggleExportMenu() {
+  exportMenu.classList.toggle('show');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#exportWrap')) exportMenu.classList.remove('show');
+});
+
+function exportCSV() {
+  exportMenu.classList.remove('show');
   if (!filteredData.length) { toast('No data to export', 'error'); return; }
   const headers = ['username','name','ig_handle','ig_url','category','industry','skills','age','experience','raw_comment'];
   const rows = filteredData.map(d => headers.map(h => `"${String(d[h]||'').replace(/"/g,'""')}"`).join(','));
@@ -1213,7 +1266,69 @@ function exportFiltered() {
   const a    = Object.assign(document.createElement('a'), { href:url, download:`TIS_${new Date().toISOString().slice(0,10)}.csv` });
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
-  toast(`${filteredData.length} rows exported`);
+  toast(`${filteredData.length} rows exported as CSV`);
+}
+
+function exportPDF() {
+  exportMenu.classList.remove('show');
+  if (!filteredData.length) { toast('No data to export', 'error'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+
+  // Header
+  doc.setFillColor(46, 46, 46);
+  doc.rect(0, 0, pageW, 18, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(255, 255, 255);
+  doc.text('THE INNOVATORS STUDIO', 14, 8);
+  doc.setFontSize(11);
+  doc.text('The Movement #IndonesiaIsUnderpriced', 14, 14);
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text(`${filteredData.length} profiles  |  Generated ${new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})}`, pageW - 14, 11, { align: 'right' });
+
+  // Table
+  const tableHeaders = ['Username', 'Category', 'Industry', 'Skills', 'Age', 'Experience'];
+  const tableRows = filteredData.map(d => [
+    (d.ig_handle || '@' + d.username),
+    (d.category || '').split(',')[0].trim(),
+    d.industry || '',
+    d.skills || '',
+    d.age && d.age !== 'Not mentioned' ? d.age : '',
+    d.experience || '',
+  ]);
+
+  doc.autoTable({
+    startY: 22,
+    head: [tableHeaders],
+    body: tableRows,
+    theme: 'grid',
+    styles: { font: 'helvetica', fontSize: 7.5, cellPadding: 2.5, lineColor: [200,200,200], lineWidth: 0.2, textColor: [46,46,46] },
+    headStyles: { fillColor: [46,46,46], textColor: [255,255,255], fontSize: 7, fontStyle: 'bold', halign: 'left' },
+    alternateRowStyles: { fillColor: [245,245,245] },
+    columnStyles: {
+      0: { cellWidth: 38 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 32 },
+      3: { cellWidth: 'auto' },
+      4: { cellWidth: 16, halign: 'center' },
+      5: { cellWidth: 28 },
+    },
+    margin: { left: 14, right: 14 },
+    didDrawPage: (data) => {
+      // Footer on each page
+      const pageH = doc.internal.pageSize.getHeight();
+      doc.setFontSize(7);
+      doc.setTextColor(160,160,160);
+      doc.text('The Movement #IndonesiaIsUnderpriced by The Innovators Studio', 14, pageH - 6);
+      doc.text(`Page ${doc.getCurrentPageInfo().pageNumber}`, pageW - 14, pageH - 6, { align: 'right' });
+    }
+  });
+
+  doc.save(`TIS_Movement_${new Date().toISOString().slice(0,10)}.pdf`);
+  toast(`${filteredData.length} profiles exported as PDF`);
 }
 
 // ── UTILS ──
