@@ -244,7 +244,7 @@ body::before {
 /* ── DASHBOARD ── */
 #dashboard {
   display: none; padding: 28px 24px 48px; max-width: 1400px; margin: 0 auto;
-  position: relative; z-index: 1;
+  position: relative; z-index: 1; overflow: hidden;
 }
 
 /* ── SECTION HEADER ── */
@@ -282,6 +282,7 @@ body::before {
 .charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 24px; }
 .chart-card {
   border-radius: var(--radius); padding: 24px;
+  overflow: hidden; min-width: 0;
 }
 .chart-head {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
@@ -294,7 +295,7 @@ body::before {
   background: rgba(0,0,0,0.04); padding: 4px 10px;
   border-radius: 20px; border: 1px solid rgba(0,0,0,0.04);
 }
-.chart-wrap { position: relative; height: 200px; }
+.chart-wrap { position: relative; height: 200px; max-width: 100%; }
 
 /* ── FILTER BAR ── */
 .filter-bar {
@@ -604,7 +605,9 @@ td { padding: 14px 16px; vertical-align: middle; }
   .brand-tagline { font-size: 10px; }
   .brand-sub { display: none; }
   .stats-row { grid-template-columns: repeat(2,1fr); gap: 10px; }
-  .charts-row { grid-template-columns: 1fr; }
+  .charts-row { grid-template-columns: 1fr; gap: 12px; }
+  .chart-card { padding: 16px 14px; }
+  .chart-wrap { height: 180px; }
   .stat { padding: 18px 16px; }
   .stat-val { font-size: 26px; }
   .topbar-right { gap: 5px; }
