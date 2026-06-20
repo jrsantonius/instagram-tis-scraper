@@ -580,16 +580,28 @@ td { padding: 14px 16px; vertical-align: middle; }
 .sort-row    { animation: fadeUp 0.5s ease both; animation-delay: 0.22s; }
 .table-card  { animation: fadeUp 0.5s ease both; animation-delay: 0.25s; }
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE — LOCKED BREAKPOINTS ── */
+
+/* Desktop (1100px+) */
+@media (min-width: 1101px) {
+  #dashboard { max-width: 1400px; min-width: 900px; margin: 0 auto; }
+}
+
+/* Tablet (701px – 1100px) */
 @media (max-width: 1100px) {
   .stats-row { grid-template-columns: repeat(2,1fr); }
   .charts-row { grid-template-columns: 1fr 1fr; }
 }
+
+/* Mobile (≤700px) */
 @media (max-width: 700px) {
+  body { min-width: 320px; }
   #dashboard { padding: 20px 16px 48px; }
-  .topbar { padding: 0 16px; height: 56px; }
-  .brand-name { font-size: 8px; }
-  .brand-tagline { font-size: 11px; }
+  .topbar { padding: 0 12px; height: 56px; }
+  .brand-mark { width: 30px; height: 30px; }
+  .brand-mark img { width: 20px; height: 20px; }
+  .brand-name { font-size: 7px; letter-spacing: 0.3px; }
+  .brand-tagline { font-size: 10px; }
   .brand-sub { display: none; }
   .stats-row { grid-template-columns: repeat(2,1fr); gap: 10px; }
   .charts-row { grid-template-columns: 1fr; }
@@ -597,10 +609,27 @@ td { padding: 14px 16px; vertical-align: middle; }
   .stat-val { font-size: 26px; }
   .topbar-right { gap: 5px; }
   .chip { font-size: 10px; padding: 4px 8px; }
-  .btn { padding: 7px 12px; font-size: 11px; }
+  .btn { padding: 7px 10px; font-size: 10px; }
+
+  /* Filter bar: stack vertically on mobile */
+  .filter-bar { flex-direction: column; gap: 8px; padding: 14px 14px; }
+  .search-wrap { min-width: 0; width: 100%; }
+  .sel { width: 100%; }
+  .results-lbl { align-self: flex-start; }
+
+  /* Sort pills: scroll horizontally */
+  .sort-row { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .sort-pill { flex-shrink: 0; }
+
+  /* Table: prevent squeeze */
+  .tbl-wrap { -webkit-overflow-scrolling: touch; }
+
   .atmo-ring-1 { width: 300px; height: 300px; top: -100px; right: -100px; }
   .atmo-ring-2 { width: 200px; height: 200px; }
   .atmo-ring-3 { display: none; }
+
+  /* Export dropdown */
+  .export-menu { right: -8px; min-width: 200px; }
 }
 </style>
 </head>
@@ -675,7 +704,7 @@ td { padding: 14px 16px; vertical-align: middle; }
   <div class="stats-row">
     <div class="stat glass"><div class="stat-accent"></div><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 20c0-4.418 3.134-8 7-8s7 3.582 7 8"/><circle cx="18" cy="8" r="2.5" opacity=".4"/><path d="M22 20c0-3.314-1.79-6-4-6" opacity=".4"/></svg></div><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total Profiles</div></div>
     <div class="stat glass"><div class="stat-accent"></div><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="1.5"/><path d="M7 7V5a5 5 0 0110 0v2"/><path d="M9 12h6M9 16h4"/></svg></div><div class="stat-val" id="statIndustries">0</div><div class="stat-lbl">Unique Industries</div></div>
-    <div class="stat glass"><div class="stat-accent"></div><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="stat-val" id="statSkills">0</div><div class="stat-lbl">Unique Skills</div></div>
+    <div class="stat glass"><div class="stat-accent"></div><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="stat-val" id="statSkills">0</div><div class="stat-lbl">Unique Categories</div></div>
     <div class="stat glass"><div class="stat-accent"></div><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div><div class="stat-val" id="statExp">&mdash;</div><div class="stat-lbl">Avg. Experience</div></div>
   </div>
 
@@ -968,15 +997,45 @@ const IND_MAP = {
   'F&B':'F&B',
 };
 
+const CAT_GROUP = {
+  'Engineering':'Technology & Engineering', 'Technology & Engineering':'Technology & Engineering',
+  'AI / Data Science':'Technology & Engineering', 'Data & Analytics':'Technology & Engineering',
+  'Quality Assurance':'Technology & Engineering', 'GIS / Mapping':'Technology & Engineering',
+  'Creative & Design':'Creative & Design', 'UI/UX & Product Design':'Creative & Design',
+  '3D / Animation':'Creative & Design', 'Architecture / Interior':'Creative & Design', 'Fashion':'Creative & Design',
+  'Marketing & Growth':'Marketing & Communications', 'Branding & Marketing':'Marketing & Communications',
+  'Social Media & Community':'Marketing & Communications', 'Communications / PR':'Marketing & Communications',
+  'Content Creation':'Marketing & Communications', 'KOL / Influencer Marketing':'Marketing & Communications',
+  'Writing & Content':'Marketing & Communications',
+  'Video & Motion':'Video & Media Production', 'Photography':'Video & Media Production',
+  'Voice / Audio':'Video & Media Production', 'Event & Production':'Video & Media Production',
+  'Talent / Performing Arts':'Video & Media Production',
+  'Project / Operations':'Business & Operations', 'Product / Operations':'Business & Operations',
+  'Sales & Business Development':'Business & Operations', 'Finance & Accounting':'Business & Operations',
+  'Human Resources':'Business & Operations', 'Legal':'Business & Operations',
+  'Education & Training':'Education & Research', 'Research & Academia':'Education & Research',
+  'Language / Translation':'Education & Research', 'Psychology / Mental Health':'Education & Research',
+  'Medical / Healthcare':'Healthcare', 'Beauty & Makeup':'Healthcare',
+  'Food & Beverage':'Food & Hospitality',
+  'Other / Multidisciplinary':'Other', 'Driving / Field Work':'Other',
+};
+
+function groupCategory(raw) {
+  if (!raw) return 'Other';
+  const first = raw.split(',')[0].trim();
+  return CAT_GROUP[first] || first;
+}
+
 function normalizeRow(r) {
   const rawExp = (r.years_of_experience_skills || r.experience || r.Experience || 'Not mentioned').toString();
   const rawInd = r.original_industry || r.industry || r.Industry || '';
+  const rawCat = (r.skill_category || r.skill_category_en || '').trim();
   return {
     username:    r.username || r.Username || '',
     name:        r.name || r.Name || r.username || '',
     ig_handle:   r.ig_handle || '@' + r.username || '',
     ig_url:      r.ig_url || `https://www.instagram.com/${r.username}/`,
-    category:    (r.skill_category || r.skill_category_en || '').trim() || 'Other',
+    category:    groupCategory(rawCat) || 'Other',
     industry:    IND_MAP[rawInd] || rawInd || '',
     skills:      ((r.skills_detailed || r.skills_detected_en || r.skills || '').replace(/not detected|tidak terdeteksi/gi, '').trim()),
     experience:  (() => {
@@ -1046,9 +1105,8 @@ function updateStats() {
   document.getElementById('statTotal').textContent = allData.length;
   const inds = new Set(allData.map(d => d.industry).filter(b => b && b !== 'Other' && b !== 'Lainnya'));
   document.getElementById('statIndustries').textContent = inds.size;
-  const skills = new Set();
-  allData.forEach(d => d.skills.split(',').forEach(s => s.trim() && skills.add(s.trim().toLowerCase())));
-  document.getElementById('statSkills').textContent = skills.size;
+  const cats = new Set(allData.map(d => d.category).filter(c => c && c !== 'Other'));
+  document.getElementById('statSkills').textContent = cats.size;
   const nums = allData.map(d => parseInt(d.experience?.match(/(\d+)/)?.[1] || '0')).filter(n => n > 0);
   const avg  = nums.length ? Math.round(nums.reduce((a,b)=>a+b,0)/nums.length) : 0;
   document.getElementById('statExp').textContent = avg ? `~${avg} yrs` : 'N/A';
@@ -1058,13 +1116,7 @@ function updateStats() {
 function renderCharts() {
   Object.values(charts).forEach(c => c.destroy());
   charts = {};
-  const catCount = {};
-  allData.forEach(d => {
-    (d.category || 'Other').split(',').forEach(c => {
-      const key = c.trim() || 'Other';
-      catCount[key] = (catCount[key] || 0) + 1;
-    });
-  });
+  const catCount = countBy(allData, 'category');
   const indCount  = countBy(allData, 'industry');
   const skillCount = {};
   allData.forEach(d => d.skills.split(',').forEach(s => {
